@@ -21,7 +21,7 @@ See [the security file](SECURITY.md)!
 - [x] Support VNC
 - [ ] <del>Support FTP</del>
 
-## Build
+### Build
 
 ```
 # 1. JDK 11+
@@ -33,7 +33,7 @@ mvn install:install-file -Dfile=C:\Users\Security\IdeaProjects\UltimateShell\src
 mvn install:install-file -Dfile=C:\Users\Security\IdeaProjects\UltimateShell\src\main\resources\libs/tightvnc-jviewer.jar -DgroupId=com.g3g4x5x6  -DartifactId=tightvnc-jviewer -Dversion=2.8.3 -Dpackaging=jar 
 ```
 
-## Usage
+### Usage
 
 ```
 # JDK 11+ 
@@ -42,7 +42,7 @@ java -jar UltimateShell-${version}-SNAPSHOT-jar-with-dependencies.jar
 ```
 See [Project wiki](https://github.com/G3G4X5X6/ultimateshell/wiki)
 
-## Libraries
+### Libraries
 - JediTerm: [https://github.com/JetBrains/jediterm](https://github.com/JetBrains/jediterm)
 - FlatLaf: [https://github.com/JFormDesigner/FlatLaf](https://github.com/JFormDesigner/FlatLaf)
 - Apache MINA SSHD: [https://github.com/apache/mina-sshd](https://github.com/apache/mina-sshd)
@@ -62,12 +62,12 @@ PRs accepted.
 
 Small note: If editing the README, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
 
-## License
+### License
 
 MIT © 2021 勾三股四弦五小六
 
 
-## Stargazers over time
+### Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/G3G4X5X6/ultimateshell.svg)](https://starchart.cc/G3G4X5X6/ultimateshell)
 
