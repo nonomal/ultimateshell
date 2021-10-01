@@ -34,17 +34,17 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 > 1. 其他平台暂无安装包，请使用 `jar` 包，[下载](https://github.com/G3G4X5X6/ultimateshell/releases)
 
 #### Windows
-1. *无依赖版本*
+*无依赖版本*
 > 安装包内置JDK及其依赖库，直接安装即可使用
 [windows x64]()
 
 
-1. *依赖JDK环境版本*
+*依赖JDK环境版本*
 > 安装内置依赖库，需要操作系统安装并配置JDK
 [windows x64]()
 
 
-1. *精简版本*
+*精简版本*
 > 无自带JDK、无依赖库，需要用户自己配置JDK和依赖库（暂不提供）
 
 
