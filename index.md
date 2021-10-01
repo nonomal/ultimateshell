@@ -1,14 +1,14 @@
-## Welcome to GitHub Pages
+## 欢迎使用 `UltimateShell`
 
-UltimateShell is a fully open-source, ultimate toolbox for remote management server.
+`UltimateShell` 是一个完全开源的远程管理服务器终极工具箱。
 
-UltimateShell is your ultimate toolbox for remote management server. Its goal is to provide a large number of customized features for penetration test engineers, programmers, webmasters, IT administrators, and almost all users who need to handle remote work in a simpler way. And, it also supports multiple operating system platforms and theme skin switching based on FlatLaf.
+`UltimateShell` 是您远程管理服务器的终极工具箱。其目标是为渗透测试工程师、程序员、网站管理员、IT 管理员以及几乎所有需要以更简单的方式处理远程工作的用户提供大量定制功能。并且，它还支持多种操作系统平台和基于FlatLaf的主题皮肤切换。
 
-### Security
+### 安全通告
 
 See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/policy)!
 
-### Features
+### 功能特点
 
 - [x] Support multi-platform
 - [x] Support 63 theme skins
@@ -21,28 +21,21 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 - [x] Support VNC
 - [ ] <del>Support FTP</del>
 
-### Build
+### 项目构建
 
 ```
 # 1. JDK 11+
 # 2. Install dependencies to LocalRepository: jediterm-pty-2.49.jar, jediterm-ssh-2.49.jar, terminal-2.54.jar, jediterm-typeahead-2.54.jar
-mvn install:install-file -Dfile=C:\Users\G3G4X5X6\IdeaProjects\ultimateshell\src\main\resources\libs/jediterm-pty-2.49.jar -DgroupId=com.g3g4x5x6  -DartifactId=jediterm-pty -Dversion=2.49 -Dpackaging=jar
-mvn install:install-file -Dfile=C:\Users\G3G4X5X6\IdeaProjects\ultimateshell\src\main\resources\libs/jediterm-ssh-2.49.jar -DgroupId=com.g3g4x5x6  -DartifactId=jediterm-ssh -Dversion=2.49 -Dpackaging=jar
-mvn install:install-file -Dfile=C:\Users\Security\IdeaProjects\UltimateShell\src\main\resources\libs/terminal-2.54.jar -DgroupId=com.g3g4x5x6  -DartifactId=terminal -Dversion=2.54 -Dpackaging=jar
-mvn install:install-file -Dfile=C:\Users\Security\IdeaProjects\UltimateShell\src\main\resources\libs/jediterm-typeahead-2.54.jar -DgroupId=com.g3g4x5x6  -DartifactId=jediterm-typeahead -Dversion=2.54 -Dpackaging=jar
-mvn install:install-file -Dfile=C:\Users\Security\IdeaProjects\UltimateShell\src\main\resources\libs/tightvnc-jviewer.jar -DgroupId=com.g3g4x5x6  -DartifactId=tightvnc-jviewer -Dversion=2.8.3 -Dpackaging=jar 
 ```
 
-### Usage
+### 下载安装
+> 跨平台运行文件： `jar`
+> Windows平台安装包：`exe`
+> 其他平台暂无安装包，请使用 `jar` 包
 
-```
-# JDK 11+ 
-java -jar UltimateShell-${version}-SNAPSHOT-jar-with-dependencies.jar
-# Or double click
-```
-See [Project wiki](https://github.com/G3G4X5X6/ultimateshell/wiki)
 
-### Libraries
+
+### 依赖库
 - JediTerm: [https://github.com/JetBrains/jediterm](https://github.com/JetBrains/jediterm)
 - FlatLaf: [https://github.com/JFormDesigner/FlatLaf](https://github.com/JFormDesigner/FlatLaf)
 - Apache MINA SSHD: [https://github.com/apache/mina-sshd](https://github.com/apache/mina-sshd)
@@ -50,11 +43,11 @@ See [Project wiki](https://github.com/G3G4X5X6/ultimateshell/wiki)
 - More...
 
 
-### Maintainers
+### 维护者
 
 [@G3G4X5X6](https://github.com/G3G4X5X6)
 
-### Contributing
+### 贡献者 (s)
 
 See [the contributing file](https://github.com/G3G4X5X6/ultimateshell/blob/main/contributing.md)!
 
@@ -62,15 +55,15 @@ PRs accepted.
 
 Small note: If editing the README, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
 
-### License
+### 授权许可
 
 MIT © 2021 勾三股四弦五小六
 
 
-### Stargazers over time
+### 点赞 (Stared)
 
 [![Stargazers over time](https://starchart.cc/G3G4X5X6/ultimateshell.svg)](https://starchart.cc/G3G4X5X6/ultimateshell)
 
-### Support or Contact
+### 技术支持（社区支持）
 
 Having trouble with Pages? Check out our [wiki](https://github.com/G3G4X5X6/ultimateshell/wiki) or [Discussions for support](https://github.com/G3G4X5X6/ultimateshell/discussions) and we’ll help you sort it out.
