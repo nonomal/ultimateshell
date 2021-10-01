@@ -39,18 +39,11 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 > 1. 其他平台暂无安装包，请使用 `jar` 包，[去下载](https://github.com/G3G4X5X6/ultimateshell/releases)
 
 #### Windows
-*JDK版本*：安装包内置JDK及其依赖库，直接安装即可使用
+*JDK版本*：安装包内置 `JDK11` 和程序依赖库，直接安装即可使用
 
-下载：[windows x64](releases/)
-
-
-*无JDK版本*：需要操作系统安装并配置JDK
-
-下载：[windows x64](releases/)
+下载：[ultimateshell_setup.exe](releases/ultimateshell_setup.exe)
 
 
-*精简版本*：无自带JDK、无依赖库，需要用户自己配置JDK和依赖库（暂不提供）
-下载：[暂无](#)
 
 <br>
 
