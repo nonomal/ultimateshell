@@ -29,9 +29,9 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 ```
 
 ### 下载安装
-> 跨平台运行文件： `jar` <br>
-> Windows平台安装包：`exe` <br>
-> 其他平台暂无安装包，请使用 `jar` 包，[去下载](https://github.com/G3G4X5X6/ultimateshell/releases)
+> 1. 跨平台运行文件： `jar` <br>
+> 1. Windows平台安装包：`exe` <br>
+> 1. 其他平台暂无安装包，请使用 `jar` 包，[去下载](https://github.com/G3G4X5X6/ultimateshell/releases)
 
 #### Windows
 *无依赖版本*
