@@ -41,7 +41,8 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 #### Windows
 *JDK版本*：安装包内置 `JDK11` 和程序依赖库，直接安装即可使用
 
-下载：[ultimateshell_setup.exe](releases/ultimateshell_setup.exe)
+下载链接：[https://pan.baidu.com/s/1tlXnvglgSKofH5-_s6t2Ug](https://pan.baidu.com/s/1tlXnvglgSKofH5-_s6t2Ug) <br>
+提取码：`5i3c` 
 
 
 
