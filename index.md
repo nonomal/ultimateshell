@@ -73,4 +73,4 @@ MIT © 2021 勾三股四弦五小六
 
 ### Support or Contact
 
-Having trouble with Pages? Check out our [wiki](https://github.com/G3G4X5X6/ultimateshell/wiki) or [contact support](https://github.com/G3G4X5X6/ultimateshell/discussions) and we’ll help you sort it out.
+Having trouble with Pages? Check out our [wiki](https://github.com/G3G4X5X6/ultimateshell/wiki) or [Discussions for support](https://github.com/G3G4X5X6/ultimateshell/discussions) and we’ll help you sort it out.
