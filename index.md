@@ -23,10 +23,9 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 
 ### 项目构建
 
-```
-# 1. JDK 11+
-# 2. Install dependencies to LocalRepository: jediterm-pty-2.49.jar, jediterm-ssh-2.49.jar, terminal-2.54.jar, jediterm-typeahead-2.54.jar
-```
+1. JDK 11+
+1. 安装依赖库到本地仓库 (Install dependencies to LocalRepository): jediterm-pty-2.49.jar, jediterm-ssh-2.49.jar, terminal-2.54.jar, jediterm-typeahead-2.54.jar
+
 
 <br>
 
@@ -36,20 +35,17 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 > 1. 其他平台暂无安装包，请使用 `jar` 包，[去下载](https://github.com/G3G4X5X6/ultimateshell/releases)
 
 #### Windows
-*无依赖版本*
-> 安装包内置JDK及其依赖库，直接安装即可使用
+*JDK版本*：安装包内置JDK及其依赖库，直接安装即可使用
 
 [windows x64]()
 
 
-*依赖JDK环境版本*
-> 安装内置依赖库，需要操作系统安装并配置JDK
+*无JDK版本*：需要操作系统安装并配置JDK
 
 [windows x64]()
 
 
-*精简版本*
-> 无自带JDK、无依赖库，需要用户自己配置JDK和依赖库（暂不提供）
+*精简版本*：无自带JDK、无依赖库，需要用户自己配置JDK和依赖库（暂不提供）
 
 
 <br>
