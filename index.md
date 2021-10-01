@@ -23,8 +23,12 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 
 ### 项目构建
 
-1. JDK 11+
-1. 安装依赖库到本地仓库 (Install dependencies to LocalRepository): jediterm-pty-2.49.jar, jediterm-ssh-2.49.jar, terminal-2.54.jar, jediterm-typeahead-2.54.jar
+- 开发JDK版本要求：JDK 11+
+- 安装依赖库到本地仓库 (Install dependencies to LocalRepository): 
+  - jediterm-pty-2.49.jar
+  - jediterm-ssh-2.49.jar
+  - terminal-2.54.jar
+  - jediterm-typeahead-2.54.jar
 
 
 <br>
