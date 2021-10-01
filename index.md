@@ -41,16 +41,16 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 #### Windows
 *JDK版本*：安装包内置JDK及其依赖库，直接安装即可使用
 
-[windows x64]()
+下载：[windows x64](releases/)
 
 
 *无JDK版本*：需要操作系统安装并配置JDK
 
-[windows x64]()
+下载：[windows x64](releases/)
 
 
 *精简版本*：无自带JDK、无依赖库，需要用户自己配置JDK和依赖库（暂不提供）
-
+下载：[暂无](#)
 
 <br>
 
