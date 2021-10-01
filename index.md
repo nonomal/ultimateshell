@@ -6,7 +6,7 @@ UltimateShell is your ultimate toolbox for remote management server. Its goal is
 
 ### Security
 
-See [the security file](SECURITY.md)!
+See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/policy)!
 
 ### Features
 
@@ -56,7 +56,7 @@ See [Project wiki](https://github.com/G3G4X5X6/ultimateshell/wiki)
 
 ### Contributing
 
-See [the contributing file](contributing.md)!
+See [the contributing file](https://github.com/G3G4X5X6/ultimateshell/blob/main/contributing.md)!
 
 PRs accepted.
 
@@ -73,4 +73,4 @@ MIT © 2021 勾三股四弦五小六
 
 ### Support or Contact
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+Having trouble with Pages? Check out our [wiki](https://github.com/G3G4X5X6/ultimateshell/wiki) or [contact support](https://github.com/G3G4X5X6/ultimateshell/discussions) and we’ll help you sort it out.
