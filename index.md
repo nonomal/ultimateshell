@@ -1,4 +1,4 @@
-## 欢迎使用 `UltimateShell`
+## 欢迎使用 *UltimateShell*
 
 `UltimateShell` 是一个完全开源的远程管理服务器终极工具箱。
 
@@ -63,7 +63,7 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 
 [@G3G4X5X6](https://github.com/G3G4X5X6)
 
-### 贡献者 (s)
+### 贡献者
 
 See [the contributing file](https://github.com/G3G4X5X6/ultimateshell/blob/main/contributing.md)!
 
