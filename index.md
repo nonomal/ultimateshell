@@ -8,7 +8,7 @@ UltimateShell is your ultimate toolbox for remote management server. Its goal is
 
 See [the security file](SECURITY.md)!
 
-## Features
+### Features
 
 - [x] Support multi-platform
 - [x] Support 63 theme skins
@@ -50,11 +50,11 @@ See [Project wiki](https://github.com/G3G4X5X6/ultimateshell/wiki)
 - More...
 
 
-## Maintainers
+### Maintainers
 
 [@G3G4X5X6](https://github.com/G3G4X5X6)
 
-## Contributing
+### Contributing
 
 See [the contributing file](contributing.md)!
 
