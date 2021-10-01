@@ -36,11 +36,13 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 #### Windows
 *无依赖版本*
 > 安装包内置JDK及其依赖库，直接安装即可使用
+
 [windows x64]()
 
 
 *依赖JDK环境版本*
 > 安装内置依赖库，需要操作系统安装并配置JDK
+
 [windows x64]()
 
 
