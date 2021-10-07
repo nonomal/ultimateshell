@@ -45,6 +45,11 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 提取码：`5i3c` 
 
 
+<br>
+
+#### 使用指南
+[UltimateShell 使用指南](usage.md)
+
 
 <br>
 
