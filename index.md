@@ -38,12 +38,6 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 > 1. Windows平台安装包：`exe` <br>
 > 1. 其他平台暂无安装包，请使用 `jar` 包，[去下载](https://github.com/G3G4X5X6/ultimateshell/releases)
 
-#### Windows
-*JDK版本*：安装包内置 `JDK11` 和程序依赖库，直接安装即可使用
-
-下载链接：[https://pan.baidu.com/s/1tlXnvglgSKofH5-_s6t2Ug](https://pan.baidu.com/s/1tlXnvglgSKofH5-_s6t2Ug) <br>
-提取码：`5i3c` 
-
 
 <br>
 
