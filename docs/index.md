@@ -1,6 +1,6 @@
 # Welcome to UltimateShell
 
-`UltimateShell` 是一个开源的远程管理服务器的终极工具箱。其目标是为渗透测试工程师、程序员、网站管理员、IT 管理员以及几乎所有需要以更简单的方式处理远程工作的用户提供大量定制功能。
+`UltimateShell` 是一个开源的远程管理服务器的终极工具箱。其目标是为渗透测试工程师、程序员、运维人员以及几乎所有需要以更简单的方式处理远程工作的用户提供大量定制功能。
 
 ## :material-security: 安全通告
 
@@ -76,7 +76,7 @@ PRs accepted.
 
 
 
-## :material-license: 授权许可
+## :books: 授权许可
 
 MIT © 2021 勾三股四弦五小六
 
