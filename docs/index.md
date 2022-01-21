@@ -1,48 +1,58 @@
 # Welcome to UltimateShell
 
-`UltimateShell` 是一个开源的远程管理服务器的终极工具箱。其目标是为渗透测试工程师、程序员、网站管理员、IT 管理员以及几乎所有需要以更简单的方式处理远程工作的用户提供大量定制功能。它还支持多种操作系统平台和基于FlatLaf的主题皮肤切换，并且内置代码编辑器和备忘笔记功能。
+`UltimateShell` 是一个开源的远程管理服务器的终极工具箱。其目标是为渗透测试工程师、程序员、网站管理员、IT 管理员以及几乎所有需要以更简单的方式处理远程工作的用户提供大量定制功能。
 
-## 安全通告
+## :material-security: 安全通告
 
 See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/policy)!
 
-## 功能特点
+## :material-checkbox-multiple-marked: 功能特点
 
 - [x] 支持多操作系统平台，兼容性测试：`Windows` > `Linux` > `MacOS`
-- [x] 支持60多种主题皮肤切换
-- [x] 支持账户会话管理
-- [x] 支持本地终端(cmd, shell)
-- [x] 支持 `SSH`、 `Sftp`，`SSH` 内置代码编辑器，支持代码高亮、折叠等功能
-- [x] 支持串口调试（自动检测存在的 `COM` 接口）
+- [x] 支持会话管理
+- [x] 支持本地终端(cmd, bash)
+- [x] 支持 `SSH`、 `Sftp`，及` 内置代码编辑器`，支持代码高亮、折叠等功能
+- [x] 支持  `COM`  口调试（自动检测存在的 `COM` 接口）
 - [x] 支持 `Telnet`
-- [x] 支持 `RDP` 远程桌面（`FreeRDP`）
+- [x] 支持 `RDP` 远程桌面（基于`FreeRDP` 实现）
 - [x] 支持 `VNC`，基于`TightVNC Viewer` 实现
-- [ ] <del>Support FTP</del>（暂不支持）
+- [x] 支持 `集成外部工具`，实现快速启动
+- [x] 内置 `简易编辑器` ，可编辑本地、远程文本文件
+- [x] 内置 `Nuclei` GUI，POC概念验证框架
+- [x] 支持60多种主题皮肤切换
+- [ ] 支持插件系统
 
-## 项目构建
+## :fontawesome-brands-guilded: 项目构建
 
 - 开发JDK版本要求：JDK 11+
-- 安装依赖库到本地仓库 (Install dependencies to LocalRepository): 
-  - jediterm-pty-2.49.jar
-  - terminal-2.66.jar
-  - jediterm-typeahead-2.66.jar
+
+- 安装依赖库到本地仓库 
+
+  ```shel
+  # tightvnc-jviewer.jar, jediterm-pty-2.49.jar, terminal-2.66.jar, jediterm-typeahead-2.66.jar
+  mvn install:install-file -Dfile=libs/tightvnc-jviewer.jar -DgroupId=com.g3g4x5x6  -DartifactId=tightvnc-jviewer -Dversion=2.8.3 -Dpackaging=jar
+  mvn install:install-file -Dfile=libs/jediterm-typeahead-2.66.jar -DgroupId=com.g3g4x5x6  -DartifactId=jediterm-typeahead -Dversion=2.66 -Dpackaging=jar
+  mvn install:install-file -Dfile=libs/terminal-2.66.jar -DgroupId=com.g3g4x5x6  -DartifactId=terminal -Dversion=2.66 -Dpackaging=jar
+  mvn install:install-file -Dfile=libs/jediterm-pty-2.49.jar -DgroupId=com.g3g4x5x6  -DartifactId=jediterm-pty -Dversion=2.49 -Dpackaging=jar
+  ```
+
   
 
-## 下载安装
+## :material-download: 下载安装
 
-> 1. 跨平台运行文件： `jar` <br>
-> 1. Windows平台安装包：`exe` <br>
-> 1. 其他平台暂无安装包，请使用 `jar` 包，[去下载](https://github.com/G3G4X5X6/ultimateshell/releases)
+1. 跨平台运行文件： `jar`
+1. Windows平台安装包：`exe`
+1. 其他平台暂无安装包，请使用 `jar` 包，[去下载](https://github.com/G3G4X5X6/ultimateshell/releases)
 
 
 
-## 使用指南
+## :material-file-document-multiple: 使用指南
 
 [UltimateShell 使用指南](document/)
 
 
 
-## 依赖库
+## :octicons-package-dependents-16: 依赖库
 
 - JediTerm: [https://github.com/JetBrains/jediterm](https://github.com/JetBrains/jediterm)
 - FlatLaf: [https://github.com/JFormDesigner/FlatLaf](https://github.com/JFormDesigner/FlatLaf)
@@ -52,34 +62,39 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 
 
 
-## 维护者
+## :man_supervillain: 维护者
 
 [@G3G4X5X6](https://github.com/G3G4X5X6)
 
 
 
-## 贡献者
+## :people_holding_hands: 贡献者
 
 See [the contributing file](https://github.com/G3G4X5X6/ultimateshell/blob/main/contributing.md)!
 
 PRs accepted.
 
-Small note: If editing the README, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
 
 
-
-## 授权许可
+## :material-license: 授权许可
 
 MIT © 2021 勾三股四弦五小六
 
 
 
-## 点赞趋势 (Stared)
+## :star_struck: 集星趋势 (Stared)
 
 ![Stargazers over time](https://starchart.cc/G3G4X5X6/ultimateshell.svg)
 
 
 
-## 技术支持（社区支持）
+## :technologist: 技术支持（社区支持）
 
 Having trouble with Pages? Check out our [wiki](https://github.com/G3G4X5X6/ultimateshell/wiki) or [Discussions for support](https://github.com/G3G4X5X6/ultimateshell/discussions) and we’ll help you sort it out.
+
+
+
+
+
+
+
