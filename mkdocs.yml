@@ -44,8 +44,32 @@ extra:
       link: mailto:g3g4x5x6@foxmail.com
 
 markdown_extensions:
-markdown_extensions:
+  # Annotations
+  - attr_list
+  - md_in_html
+  # Code blocks Error
+#  - pymdownx.highlight:
+#      anchor_linenums: true
+#  - pymdownx.inlinehilite
+#  - pymdownx.snippets
+#  - pymdownx.superfences
+  # Formatting
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  # Data tables
+  - tables
+  # Lists
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  # Images
+  - attr_list
+  - md_in_html
   - meta
+  # Icons + Emojis
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji 
       emoji_generator: !!python/name:materialx.emoji.to_svg
