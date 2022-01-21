@@ -14,9 +14,8 @@
 
 :two: 通用包 `UltimateShell-x.x.x-jar-with-dependencies.jar`  
 
-- 已安装JDK，并配置了系统环境变量（不懂的建议百度），可 `双击执行`
+- 已安装JDK，并配置了系统环境变量（不懂的建议百度），可 `双击执行`，或者命令执行 `java -jar UltimateShell-x.x.x-jar-with-dependencies.jar ` 
 
-- 或者命令执行 `java -jar UltimateShell-x.x.x-jar-with-dependencies.jar ` 
 - 没有配置环境变量的可以使用 `java` 程序的绝对路径，`D:\jdk-11\bin\java.exe -jar java -jar UltimateShell-x.x.x-jar-with-dependencies.jar`
 
 :three: 最小体积 `UltimateShell-x.x.x.jar` 
