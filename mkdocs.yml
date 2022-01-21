@@ -25,7 +25,7 @@ theme:
         name: Switch to light mode
 
 nav:
-  - 主页:   # 项目介绍
+  - 项目主页:   # 项目介绍
     - 欢迎使用 UltimateShell: index.md
   - 使用文档:
     - 安装: document/index.md
