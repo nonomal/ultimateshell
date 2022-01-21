@@ -84,7 +84,7 @@ MIT © 2021 勾三股四弦五小六
 
 ### 点赞趋势 (Stared)
 
-[![Stargazers over time](../images/index/ultimateshell.svg)](https://starchart.cc/G3G4X5X6/ultimateshell)
+[![Stargazers over time](https://starchart.cc/G3G4X5X6/ultimateshell.svg)](https://starchart.cc/G3G4X5X6/ultimateshell)
 
 <br>
 
