@@ -34,6 +34,7 @@ nav:
     - 高级: document/3.professional.md
   - 相关文章:
     - 概述: blog/index.md
+    - 第一个安全属性：nuclei: blog/nuclei.md
 
 plugins:
 #  - tags

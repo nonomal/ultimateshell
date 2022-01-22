@@ -22,6 +22,7 @@
 2. 可以按照自己的想法进行定制化开发。
 3. 能够集成管理外部工具，形成快速启动工具箱。
 4. 集成安全属性，这是很多工具所不具备的，如代码检查能力、POC验证框架，可以方便安全人员快速发现、定位安全问题。
+4. 还有就是想维护一个开源项目，算是对开源环境的一个正向反馈。
 5. 完美！
 
 于是，这代码敲着，敲着，就成了现在这样了......
@@ -53,11 +54,11 @@ See [the security file](https://github.com/G3G4X5X6/ultimateshell/security/polic
 - 安装依赖库到本地仓库 
 
   ```shel
-  # tightvnc-jviewer.jar, jediterm-pty-2.49.jar, terminal-2.66.jar, jediterm-typeahead-2.66.jar
+  # tightvnc-jviewer.jar, jediterm-pty-2.66.jar, terminal-2.66.jar, jediterm-typeahead-2.66.jar
   mvn install:install-file -Dfile=libs/tightvnc-jviewer.jar -DgroupId=com.g3g4x5x6  -DartifactId=tightvnc-jviewer -Dversion=2.8.3 -Dpackaging=jar
   mvn install:install-file -Dfile=libs/jediterm-typeahead-2.66.jar -DgroupId=com.g3g4x5x6  -DartifactId=jediterm-typeahead -Dversion=2.66 -Dpackaging=jar
   mvn install:install-file -Dfile=libs/terminal-2.66.jar -DgroupId=com.g3g4x5x6  -DartifactId=terminal -Dversion=2.66 -Dpackaging=jar
-  mvn install:install-file -Dfile=libs/jediterm-pty-2.49.jar -DgroupId=com.g3g4x5x6  -DartifactId=jediterm-pty -Dversion=2.49 -Dpackaging=jar
+  mvn install:install-file -Dfile=libs/jediterm-pty-2.66.jar -DgroupId=com.g3g4x5x6  -DartifactId=jediterm-pty -Dversion=2.66 -Dpackaging=jar
   ```
 
   

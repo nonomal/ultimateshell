@@ -1,6 +1,6 @@
 ## :material-tag: 发布版本
 
-![image-20220121152048112](images/index/image-20220121152048112.png)
+![image-20220122151254763](../imags/index/image-20220122151254763.png)
 
 1. `UltimateShell-x.x.x-jar-with-dependencies.jar` ：打包了完整的依赖包（平台通用）
 2. `UltimateShell-x.x.x.jar` ：没有打包任何依赖包
@@ -35,6 +35,21 @@
 ## :fontawesome-brands-apple: MacOS 安装
 
 建议使用平台通用包  `java -jar UltimateShell-x.x.x-jar-with-dependencies.jar ` 
+
+
+
+
+
+## :material-tools: Xpack-Tools 功能增强包
+
+Git 克隆增强包放置到 `ultimateshell` 工作空间的 `tools` 目录下，如：`C:\Users\G3G4X5X6\.ultimateshell\tools`
+
+```shell
+# 也可以自己按照仓库的目录结构创建目录，从官网下载工具
+git clone https://github.com/G3G4X5X6/xpack_tools.git
+```
+
+
 
 
 
