@@ -1,3 +1,9 @@
+> <font style='color:green'>TIPS</font>
+>
+> - `ultimateshell` 有一个工作空间（目录）在第一次运行时创建，相关数据皆在其中。
+>
+> - 第一次安装完成（或运行一次）后，根据需要克隆下载 `Xpack-Tools 功能增强包` 方可使用部分增强功能，如：`FreeRDP` 、 `Nuclei PoC-概念验证框架` 等。
+
 ## :material-tag: 发布版本
 
 ![image-20220122151254763](../imags/index/image-20220122151254763.png)
@@ -5,6 +11,7 @@
 1. `UltimateShell-x.x.x-jar-with-dependencies.jar` ：打包了完整的依赖包（平台通用）
 2. `UltimateShell-x.x.x.jar` ：没有打包任何依赖包
 3. `ultimateshell_setup.exe`：Windows安装程序（Windows专用）
+
 
 ## :fontawesome-brands-windows: Windows 安装
 
