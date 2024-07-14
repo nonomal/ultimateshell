@@ -5,25 +5,31 @@ import com.alibaba.fastjson.JSONObject;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.formdev.flatlaf.extras.components.FlatToggleButton;
-import com.g3g4x5x6.console.ConsolePane;
-import com.g3g4x5x6.dashboard.QuickStartPane;
-import com.g3g4x5x6.dialog.LockDialog;
 import com.g3g4x5x6.editor.EditorFrame;
 import com.g3g4x5x6.editor.EditorPanel;
-import com.g3g4x5x6.focus.FocusFrame;
-import com.g3g4x5x6.panel.ConnectionPane;
-import com.g3g4x5x6.panel.RandomPasswordPane;
-import com.g3g4x5x6.panel.SessionManagerPanel;
-import com.g3g4x5x6.panel.SysinfoPane;
+import com.g3g4x5x6.panel.console.ConsolePane;
+import com.g3g4x5x6.panel.focus.FocusFrame;
+import com.g3g4x5x6.panel.notepad.NotepadDialog;
+import com.g3g4x5x6.panel.other.ConnectionPane;
+import com.g3g4x5x6.panel.other.SysinfoPane;
+import com.g3g4x5x6.panel.session.NewSessionManagerPanel;
+import com.g3g4x5x6.panel.session.RecentSessionPanel;
+import com.g3g4x5x6.remote.NewTabbedPane;
+import com.g3g4x5x6.remote.ssh.SessionInfo;
+import com.g3g4x5x6.remote.ssh.panel.SshTabbedPane;
+import com.g3g4x5x6.remote.utils.CommonUtil;
+import com.g3g4x5x6.remote.utils.EditorUtils;
+import com.g3g4x5x6.remote.utils.SshUtil;
+import com.g3g4x5x6.remote.utils.session.SessionUtil;
 import com.g3g4x5x6.settings.SettingsDialog;
-import com.g3g4x5x6.ssh.SessionInfo;
-import com.g3g4x5x6.ssh.panel.SshTabbedPane;
-import com.g3g4x5x6.tools.ColorPicker;
-import com.g3g4x5x6.tools.QRTool;
+import com.g3g4x5x6.tools.PasswordGeneratorPanel;
 import com.g3g4x5x6.tools.external.ExternalToolIntegration;
-import com.g3g4x5x6.tools.xpack.FreeRdp;
 import com.g3g4x5x6.ui.StatusBar;
-import com.g3g4x5x6.utils.*;
+import com.g3g4x5x6.ui.dialog.LockDialog;
+import com.g3g4x5x6.user.UserDialog;
+import com.g3g4x5x6.utils.DialogUtil;
+import com.g3g4x5x6.utils.InternalToolUtils;
+import com.g3g4x5x6.utils.SessionExcelHelper;
 import com.glavsoft.exceptions.CommonException;
 import com.glavsoft.viewer.ParametersHandler;
 import com.glavsoft.viewer.Viewer;
@@ -33,17 +39,17 @@ import com.glavsoft.viewer.swing.mac.MacUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.sshd.common.util.OsUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -59,15 +65,17 @@ public class MainFrame extends JFrame implements MouseListener {
 
     public static JTabbedPane mainTabbedPane;
     public static EditorFrame editorFrame = EditorFrame.getInstance();
+    public static NotepadDialog notepadDialog = NotepadDialog.getInstance();
     public static JProgressBar waitProgressBar;
     public static AtomicInteger waitCount = new AtomicInteger(0);
     public static int focusIndex = 0;
 
     private final ExternalToolIntegration integration = new ExternalToolIntegration();
+    private static Process x11Process = null;
 
     // TODO JFrame 组件定义
     private final JMenuBar menuBar = new JMenuBar();
-    private final JMenu terminalMenu = new JMenu("终端");
+    private final JMenu terminalMenu = new JMenu("文件");
     private final JMenu viewMenu = new JMenu("视图");
     private final JMenu optionMenu = new JMenu("设置");
     private final JMenu toolMenu = new JMenu("工具");
@@ -75,9 +83,8 @@ public class MainFrame extends JFrame implements MouseListener {
     private final JMenu helpMenu = new JMenu("帮助");
     private final JMenu externalSubMenu = new JMenu("外部集成工具");
     private final JPopupMenu popupMenu = new JPopupMenu();
-    private final JPopupMenu trailPopupMenu = new JPopupMenu();
 
-    private final StatusBar statusBar = new StatusBar();
+    private final static StatusBar statusBar = new StatusBar();
 
     private String latestVersion;
 
@@ -87,7 +94,7 @@ public class MainFrame extends JFrame implements MouseListener {
         this.setPreferredSize(new Dimension(1000, 600));
         this.setMinimumSize(new Dimension(950, 600));
         this.setLocationRelativeTo(null);
-        this.setIconImage(new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("icon.jpg"))).getImage());
+        this.setIconImage(new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("app.png"))).getImage());
 
         // 初始化 ”菜单栏“
         initMenuBar();
@@ -102,7 +109,6 @@ public class MainFrame extends JFrame implements MouseListener {
         initStatusBar();
 
         WindowListener exitListener = new WindowAdapter() {
-
             @Override
             public void windowClosing(WindowEvent e) {
                 log.debug("关闭窗口，Windows");
@@ -130,6 +136,7 @@ public class MainFrame extends JFrame implements MouseListener {
     private void initMenuBar() {
         // 终端菜单
         JMenu openSessionMenu = new JMenu("打开会话");
+        openSessionMenu.setIcon(new FlatSVGIcon("icons/listFiles.svg"));
         String rootPath = AppConfig.getWorkPath() + "/sessions/ssh/";
         File dir = new File(rootPath);
         try {
@@ -137,20 +144,35 @@ public class MainFrame extends JFrame implements MouseListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        terminalMenu.add(myNewAction);
+
+        JMenuItem newSessionItem = new JMenuItem("新建会话");
+        newSessionItem.setIcon(new FlatSVGIcon("icons/openNewTab.svg"));
+        newSessionItem.addActionListener(myNewAction);
+
+        // consoleRun.svg
+        JMenuItem consoleItem = new JMenuItem("本地终端");
+        consoleItem.setIcon(new FlatSVGIcon("icons/consoleRun.svg"));
+        consoleItem.addActionListener(myLocalTerminal);
+
+        // addBookmarksList
+        JMenuItem sessionItem = new JMenuItem("会话管理");
+        sessionItem.setIcon(new FlatSVGIcon("icons/addBookmarksList.svg"));
+        sessionItem.addActionListener(mySessionAction);
+
         terminalMenu.add(openSessionMenu);
-        terminalMenu.add(mySessionAction);
-        terminalMenu.add(myLocalTerminal);
+        terminalMenu.add(newSessionItem);
+        terminalMenu.add(sessionItem);
+        terminalMenu.add(consoleItem);
 
         // 查看菜单
         JMenuItem focusItem = new JMenuItem("专注模式");
-        focusItem.setIcon(new FlatSVGIcon("icons/fitContent.svg"));
-        focusItem.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                focusAction();
-            }
-        });
+        focusItem.setIcon(new FlatSVGIcon("icons/cwmScreenOn.svg"));
+//        focusItem.addActionListener(new AbstractAction() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                focusAction();
+//            }
+//        });
 
         JMenu paneMenu = new JMenu("面板");
         JMenuItem infoItem = new JMenuItem("系统信息");
@@ -177,14 +199,22 @@ public class MainFrame extends JFrame implements MouseListener {
         viewMenu.add(paneMenu);
 
 
-
         // 选项菜单
         JMenuItem settingsItem = new JMenuItem("全局配置");
+        settingsItem.setIcon(new FlatSVGIcon("icons/settings.svg"));
         settingsItem.setAccelerator(KeyStroke.getKeyStroke('S', InputEvent.ALT_DOWN_MASK));
         settingsItem.addActionListener(settingsAction);
 
-        JMenuItem editSettingsItem = new JMenuItem("编辑配置文件");
+        JMenuItem editAppSettingsItem = new JMenuItem("配置文件（主程序）");
+        editAppSettingsItem.addActionListener(editAppSettingsAction);
+
+        JMenuItem editEditorSettingsItem = new JMenuItem("配置文件（编辑器）");
+        editEditorSettingsItem.addActionListener(editEditorSettingsAction);
+
         optionMenu.add(settingsItem);
+        optionMenu.addSeparator();
+        optionMenu.add(editAppSettingsItem);
+        optionMenu.add(editEditorSettingsItem);
         optionMenu.addSeparator();
         optionMenu.add(importSessionAction);
         optionMenu.add(exportSessionAction);
@@ -204,9 +234,9 @@ public class MainFrame extends JFrame implements MouseListener {
         openSpace.setIcon(new FlatSVGIcon("icons/pluginIcon.svg"));
 
         // relevantProposal.svg
-        JMenuItem aboutMe = new JMenuItem("关于 UltimateShell");
+        JMenuItem aboutMe = new JMenuItem("关于 ultimate-cube");
         aboutMe.addActionListener(myAboutAction);
-        aboutMe.setIcon(new FlatSVGIcon("icons/relevantProposal.svg"));
+        aboutMe.setIcon(new FlatSVGIcon("icons/informix.svg"));
 
         helpMenu.add(github);
         helpMenu.add(gitPage);
@@ -220,18 +250,17 @@ public class MainFrame extends JFrame implements MouseListener {
         editorItem.setIcon(new FlatSVGIcon("icons/editScheme.svg"));
         editorItem.addActionListener(myEditorAction);
 
+        // X11-Server 菜单
+        JMenu x11Menu = getX11Menu();
+
         toolMenu.add(editorItem);
+        toolMenu.add(x11Menu);
         toolMenu.addSeparator();
         toolMenu.add(tightVNCAction);
-        // 快捷键
-        JMenuItem freeRdpItem = new JMenuItem("FreeRDP");
-        freeRdpItem.setAccelerator(KeyStroke.getKeyStroke('D', InputEvent.ALT_DOWN_MASK));
-        freeRdpItem.addActionListener(freeRDPAction);
-        toolMenu.add(freeRdpItem);
         toolMenu.addSeparator();
 
-        JMenuItem randomPassItem = new JMenuItem("随机密码生成器");
-        randomPassItem.setIcon(new FlatSVGIcon("icons/section.svg"));
+        JMenuItem randomPassItem = new JMenuItem("密码生成器");
+        randomPassItem.setIcon(new FlatSVGIcon("icons/cwmPermissions.svg"));
         randomPassItem.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -239,23 +268,9 @@ public class MainFrame extends JFrame implements MouseListener {
             }
         });
 
-        JMenu otherToolMenu = new JMenu("杂七杂八");
-        otherToolMenu.add(randomPassItem);
-        otherToolMenu.add(encodeConversionAction);
-        otherToolMenu.add(colorPickerAction);
-        otherToolMenu.add(qrCodePickerAction);
-        toolMenu.add(otherToolMenu);
+        toolMenu.add(randomPassItem);
         toolMenu.addSeparator();
-        toolMenu.add(externalSubMenu);
-
-        // 插件菜单
-        pluginMenu.add(loadPluginAction);
-        pluginMenu.add(managePluginAction);
-        pluginMenu.addSeparator();
-        pluginMenu.add(apiPluginAction);
-
-        // 外部集成工具
-        externalSubMenu.add(new AbstractAction("工具管理") {
+        toolMenu.add(new AbstractAction("外部集成工具配置") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 log.debug("工具管理");
@@ -267,8 +282,12 @@ public class MainFrame extends JFrame implements MouseListener {
                 editorFrame.setVisible(true);
             }
         });
-        externalSubMenu.addSeparator();
-        integration.initExternalToolsMenu(externalSubMenu);
+
+        // 插件菜单
+        pluginMenu.add(loadPluginAction);
+        pluginMenu.add(managePluginAction);
+        pluginMenu.addSeparator();
+        pluginMenu.add(apiPluginAction);
 
         menuBar.add(terminalMenu);
         menuBar.add(viewMenu);
@@ -279,13 +298,63 @@ public class MainFrame extends JFrame implements MouseListener {
         this.setJMenuBar(menuBar);
     }
 
+    private static @NotNull JMenu getX11Menu() {
+        JMenu x11Menu = new JMenu("X11-Server");
+        x11Menu.setIcon(new FlatSVGIcon("icons/deploy.svg"));
+        // 菜单项
+        JCheckBox startX11Item = new JCheckBox("启用 X11-Server");
+        startX11Item.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (startX11Item.isSelected()) {
+                    MainFrame.setStatusText("启用 X11-Server （Running）");
+                    SwingWorker<Void, Integer> worker = new SwingWorker<>() {
+                        @Override
+                        protected Void doInBackground() {
+                            x11Process = InternalToolUtils.startX11Process();
+                            return null;
+                        }
+
+                        @Override
+                        protected void done() {
+                            if (x11Process != null && x11Process.isAlive()) {
+                                MainFrame.setStatusText("启用 X11-Server （成功，DISPLAY=0.0.0.0:" + InternalToolUtils.DISPLAY + ".0）");
+                            } else {
+                                MainFrame.setStatusText("启用 X11-Server （失败）");
+                            }
+                        }
+                    };
+                    worker.execute();
+                } else {
+                    if (x11Process != null && x11Process.isAlive()) {
+                        InternalToolUtils.destroyProcess(x11Process);
+                        MainFrame.setStatusText("关闭 X11-Server （成功）");
+                    } else {
+                        MainFrame.setStatusText("关闭 X11-Server （失败）");
+                    }
+                }
+            }
+        });
+        JMenuItem configItem = new JMenuItem("配置");
+        x11Menu.add(startX11Item);
+        x11Menu.addSeparator();
+        x11Menu.add(configItem);
+        return x11Menu;
+    }
+
     private void initFuncIconButton() {
         // add "Users" button to menubar
         FlatButton usersButton = new FlatButton();
         usersButton.setIcon(new FlatSVGIcon("icons/users.svg"));
         usersButton.setButtonType(FlatButton.ButtonType.toolBarButton);
         usersButton.setFocusable(false);
-        usersButton.addActionListener(e -> JOptionPane.showMessageDialog(MainFrame.this, "Hello User! How are you?", "User", JOptionPane.INFORMATION_MESSAGE));
+        usersButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                UserDialog userDialog = new UserDialog();
+                userDialog.setVisible(true);
+            }
+        });
 
         FlatButton lockBtn = new FlatButton();
         lockBtn.setIcon(new FlatSVGIcon("icons/lock.svg"));
@@ -312,9 +381,11 @@ public class MainFrame extends JFrame implements MouseListener {
                 if (toggleButton.isSelected()) {
                     setAlwaysOnTop(true);
                     toggleButton.setToolTipText("取消置顶");
+                    editorFrame.setAlwaysOnTop(true);
                 } else {
                     setAlwaysOnTop(false);
                     toggleButton.setToolTipText("窗口置顶");
+                    MainFrame.editorFrame.setAlwaysOnTop(false);
                 }
             }
         });
@@ -346,17 +417,11 @@ public class MainFrame extends JFrame implements MouseListener {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         // 检查更新
-                        String msg = "<html>当前版本：  <font color='red'>" + currentVersion + "</font<br>" +
-                                "最新版本： <font color='green'>" + latestVersion + "</font><br><br>" +
-                                "是否现在下载最新版本？</html>";
-//                        log.debug("Msg: " + msg);
+                        String msg = "<html>当前版本：  <fo nt color='red'>" + currentVersion + "</font<br>" + "最新版本： <font color='green'>" + latestVersion + "</font><br><br>" + "是否现在下载最新版本？</html>";
                         int code = JOptionPane.showConfirmDialog(App.mainFrame, msg, "更新", JOptionPane.YES_NO_OPTION);
                         if (code == 0) {
-                            // TODO 更新
-//                            log.debug("马上下载更新");
                             CommonUtil.getLatestJar();
                         } else {
-                            // TODO 暂不更新
                             log.debug("暂不下载更新");
                         }
                     }
@@ -384,14 +449,12 @@ public class MainFrame extends JFrame implements MouseListener {
         initTabPopupMenu();     // 定制 ”选项卡面板“ 标签右键功能
 
         // 添加 ”快速启动“ 面板
-        mainTabbedPane.addTab("快速启动",
-                new FlatSVGIcon("icons/start.svg"),
-                new QuickStartPane());
+        mainTabbedPane.addTab("快速启动", new FlatSVGIcon("icons/homeFolder.svg"), new RecentSessionPanel());
 
         this.getContentPane().add(mainTabbedPane);
     }
 
-    private void initStatusBar(){
+    private void initStatusBar() {
         this.add(statusBar, BorderLayout.SOUTH);
     }
 
@@ -414,47 +477,39 @@ public class MainFrame extends JFrame implements MouseListener {
         });
 
         JButton addBtn = new JButton(new FlatSVGIcon("icons/add.svg"));
+        addBtn.setToolTipText("新建会话");
         addBtn.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mainTabbedPane.insertTab("新建选项卡", new FlatSVGIcon("icons/addToDictionary.svg"), new NewTabbedPane(mainTabbedPane), "新建选项卡", mainTabbedPane.getTabCount());
+                mainTabbedPane.insertTab("新建会话", new FlatSVGIcon("icons/addToDictionary.svg"), new NewTabbedPane(mainTabbedPane), "新建会话", mainTabbedPane.getTabCount());
                 mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
             }
         });
-        // swiftPackage.svg
-        JButton sessionManagerBtn = new JButton(new FlatSVGIcon("icons/swiftPackage.svg"));
-        sessionManagerBtn.setToolTipText("会话管理面板");
+
+        JButton sessionManagerBtn = new JButton(new FlatSVGIcon("icons/addBookmarksList.svg"));
+        sessionManagerBtn.setToolTipText("会话管理");
+        sessionManagerBtn.setSelected(true);
         sessionManagerBtn.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mainTabbedPane.insertTab("会话管理", new FlatSVGIcon("icons/addList.svg"), new SessionManagerPanel(mainTabbedPane), "会话管理", mainTabbedPane.getTabCount());
+                mainTabbedPane.insertTab("会话管理", new FlatSVGIcon("icons/addList.svg"), new NewSessionManagerPanel(), "会话管理", mainTabbedPane.getTabCount());
                 mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
             }
         });
 
-        JButton fullScreenBtn = new JButton(new FlatSVGIcon("icons/fitContent.svg"));
-        fullScreenBtn.setToolTipText("专注模式");
-        fullScreenBtn.addActionListener(new AbstractAction() {
+        JButton notePaneBtn = new JButton(new FlatSVGIcon("icons/addNote.svg"));
+        notePaneBtn.setToolTipText("备忘笔记");
+        notePaneBtn.setSelected(true);
+        notePaneBtn.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                focusAction();
-            }
-        });
-
-        JButton genPassBtn = new JButton(new FlatSVGIcon("icons/section.svg"));
-        genPassBtn.setToolTipText("生成随机密码");
-        genPassBtn.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showRandomPasswordDialog();
+                notepadDialog.setVisible(true);
+                notepadDialog.setAlwaysOnTop(isAlwaysOnTop());
             }
         });
 
         // TODO 选项卡面板前置工具栏，暂不使用
         leading.add(dashboardBtn);
-
-        JButton editorBtn = new JButton(new FlatSVGIcon("icons/editScheme.svg"));
-        editorBtn.addActionListener(myEditorAction);
 
         waitProgressBar = new JProgressBar();
         waitProgressBar.setIndeterminate(true);
@@ -472,22 +527,84 @@ public class MainFrame extends JFrame implements MouseListener {
             }
         });
 
+        // externalTools.svg
+        JButton externalToolsBtn = new JButton(new FlatSVGIcon("icons/externalTools.svg"));
+        externalToolsBtn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JPopupMenu popupMenu = new JPopupMenu();
+                integration.initExternalToolsPopupMenu(popupMenu);
+                popupMenu.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+
+        JButton trailMenuBtn = new JButton(new FlatSVGIcon("icons/windows.svg"));
+        if (OsUtils.isWin32()) {
+            // windows.svg
+            trailMenuBtn.setIcon(new FlatSVGIcon("icons/windows.svg"));
+        } else if (OsUtils.isUNIX()) {
+            // linux.svg
+            trailMenuBtn.setIcon(new FlatSVGIcon("icons/linux.svg"));
+        } else if (OsUtils.isOSX()) {
+            // macOS.svg
+            trailMenuBtn.setIcon(new FlatSVGIcon("icons/macOS.svg"));
+        }
+        JPopupMenu trailPopupMenu = createTrailPopupMenu();
+        // 右键
+        trailMenuBtn.setComponentPopupMenu(trailPopupMenu);
+        // 单击
+        trailMenuBtn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                log.debug("trailMenuBtn");
+                trailPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+
         trailing.add(addBtn);
         trailing.add(sessionManagerBtn);
+        trailing.add(notePaneBtn);
         trailing.add(Box.createHorizontalGlue());
         trailing.add(waitProgressBar);
         trailing.add(Box.createHorizontalGlue());
-        trailing.add(editorBtn);
-        trailing.add(fullScreenBtn);
-        trailing.add(genPassBtn);
+        trailing.add(externalToolsBtn);
+        trailing.add(trailMenuBtn);
         mainTabbedPane.putClientProperty(TABBED_PANE_TRAILING_COMPONENT, trailing);
+    }
+
+    private JPopupMenu createTrailPopupMenu() {
+        JPopupMenu trailPopupMenu = new JPopupMenu();
+
+        JMenuItem genPassItem = new JMenuItem("密码生成器");
+        genPassItem.setIcon(new FlatSVGIcon("icons/cwmPermissions.svg"));
+        genPassItem.setToolTipText("密码生成器");
+        genPassItem.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showRandomPasswordDialog();
+            }
+        });
+
+        JMenuItem editorItem = new JMenuItem("简易编辑器");
+        editorItem.setIcon(new FlatSVGIcon("icons/editScheme.svg"));
+        editorItem.setToolTipText("内置简易编辑器");
+        editorItem.addActionListener(myEditorAction);
+
+        trailPopupMenu.add(editorItem);
+        trailPopupMenu.add(genPassItem);
+
+        return trailPopupMenu;
     }
 
     private void focusAction() {
         log.debug("专注模式");
-        setFocusIndex();
-        FocusFrame focusFrame = new FocusFrame();
-        focusFrame.setVisible(true);
+        if (!App.sessionInfos.isEmpty()) {
+            App.isFocus = true;
+            editorFrame.setAlwaysOnTop(true);
+            setFocusIndex();
+            FocusFrame focusFrame = new FocusFrame();
+            focusFrame.setVisible(true);
+        }
     }
 
     private void setFocusIndex() {
@@ -532,9 +649,7 @@ public class MainFrame extends JFrame implements MouseListener {
                                     SessionInfo sessionInfo = SessionUtil.openSshSession(f.getAbsolutePath());
                                     if (SshUtil.testConnection(sessionInfo.getSessionAddress(), sessionInfo.getSessionPort()) == 1) {
                                         String defaultTitle = sessionInfo.getSessionName().equals("") ? "未命名" : sessionInfo.getSessionName();
-                                        MainFrame.mainTabbedPane.addTab(defaultTitle, new FlatSVGIcon("icons/OpenTerminal_13x13.svg"),
-                                                new SshTabbedPane(sessionInfo)
-                                        );
+                                        MainFrame.mainTabbedPane.addTab(defaultTitle, new FlatSVGIcon("icons/consoleRun.svg"), new SshTabbedPane(sessionInfo));
                                         MainFrame.mainTabbedPane.setSelectedIndex(MainFrame.mainTabbedPane.getTabCount() - 1);
                                     }
                                     App.sessionInfos.put(sessionInfo.getSessionId(), sessionInfo);
@@ -551,26 +666,24 @@ public class MainFrame extends JFrame implements MouseListener {
     private void initClosableTabs(JTabbedPane tabbedPane) {
         tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSABLE, true);
         tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, "Close");
-        tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_CALLBACK,
-                (BiConsumer<JTabbedPane, Integer>) (tabPane, tabIndex) -> {
-                    if (tabIndex != 0) {
-                        if (mainTabbedPane.getComponentAt(tabIndex) instanceof SshTabbedPane) {
-                            SshTabbedPane sshTabbedPane = (SshTabbedPane) mainTabbedPane.getComponentAt(tabIndex);
-                            sshTabbedPane.getSessionInfo().close();
-                            App.sessionInfos.remove(sshTabbedPane.getSessionInfo().getSessionId());
-                            log.debug("Close: " + App.sessionInfos.size());
-                        }
-                        mainTabbedPane.removeTabAt(tabIndex);
-                    }
-                });
+        tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabPane, tabIndex) -> {
+            if (tabIndex != 0) {
+                if (mainTabbedPane.getComponentAt(tabIndex) instanceof SshTabbedPane) {
+                    SshTabbedPane sshTabbedPane = (SshTabbedPane) mainTabbedPane.getComponentAt(tabIndex);
+                    sshTabbedPane.getSessionInfo().close();
+                    App.sessionInfos.remove(sshTabbedPane.getSessionInfo().getSessionId());
+                    log.debug("Close: " + App.sessionInfos.size());
+                }
+                mainTabbedPane.removeTabAt(tabIndex);
+            }
+        });
     }
 
     private void renameTabTitle() {
-        String input = JOptionPane.showInputDialog(App.mainFrame, "重命名 Tab 标题",
-                mainTabbedPane.getTitleAt(mainTabbedPane.getSelectedIndex()));
+        String input = JOptionPane.showInputDialog(App.mainFrame, "重命名 Tab 标题", mainTabbedPane.getTitleAt(mainTabbedPane.getSelectedIndex()));
         if (input != null && !input.strip().equalsIgnoreCase("")) {
             JLabel newTabTitle = new JLabel(input);
-            newTabTitle.setIcon(new FlatSVGIcon("icons/OpenTerminal_13x13.svg"));
+            newTabTitle.setIcon(mainTabbedPane.getIconAt(mainTabbedPane.getSelectedIndex()));
             mainTabbedPane.setTabComponentAt(mainTabbedPane.getSelectedIndex(), newTabTitle);
         }
     }
@@ -579,49 +692,48 @@ public class MainFrame extends JFrame implements MouseListener {
         AbstractAction renameCurrentTabAction = new AbstractAction("命名标签") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // 判断是否为 SshTabbedPane 实例
-                if (mainTabbedPane.getComponentAt(mainTabbedPane.getSelectedIndex()) instanceof SshTabbedPane) {
-                    renameTabTitle();
-                }
+                if (mainTabbedPane.getSelectedIndex() == 0) return;
+                renameTabTitle();
             }
         };
         AbstractAction copyCurrentTabAction = new AbstractAction("复制会话") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new Thread(()->{
-                    // 等待进度条
-                    MainFrame.addWaitProgressBar();
+                if (mainTabbedPane.getComponentAt(mainTabbedPane.getSelectedIndex()) instanceof SshTabbedPane) {
+                    new Thread(() -> {
+                        // 等待进度条
+                        MainFrame.addWaitProgressBar();
 
-                    SshTabbedPane selectedTabbedPane = (SshTabbedPane) mainTabbedPane.getSelectedComponent();
-                    mainTabbedPane.addTab(
-                            "复制-" + mainTabbedPane.getTitleAt(mainTabbedPane.getSelectedIndex()),
-                            new FlatSVGIcon("icons/OpenTerminal_13x13.svg"),
-                            new SshTabbedPane(selectedTabbedPane.getSessionInfo().copy())
-                    );
-                    mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
+                        SshTabbedPane selectedTabbedPane = (SshTabbedPane) mainTabbedPane.getSelectedComponent();
+                        mainTabbedPane.addTab("复制-" + mainTabbedPane.getTitleAt(mainTabbedPane.getSelectedIndex()), new FlatSVGIcon("icons/consoleRun.svg"), new SshTabbedPane(selectedTabbedPane.getSessionInfo().copy()));
+                        mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
 
-                    // 移除等待进度条
-                    MainFrame.removeWaitProgressBar();
-                }).start();
+                        // 移除等待进度条
+                        MainFrame.removeWaitProgressBar();
+                    }).start();
+                }
             }
         };
         AbstractAction reconnectAction = new AbstractAction("<html><font style='color:green'>重新连接</font></html>") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 log.debug("重新连接");
-                try {
-                    SshTabbedPane selectedTabbedPane = (SshTabbedPane) mainTabbedPane.getSelectedComponent();
-                    selectedTabbedPane.resetSession();
-                } catch (ClassCastException classCastException) {
-                    if (classCastException.getMessage().contains("be cast to class")) {
-                        log.debug("不是远程会话面板无法刷新重连");
+                if (mainTabbedPane.getComponentAt(mainTabbedPane.getSelectedIndex()) instanceof SshTabbedPane) {
+                    try {
+                        SshTabbedPane selectedTabbedPane = (SshTabbedPane) mainTabbedPane.getSelectedComponent();
+                        selectedTabbedPane.resetSession();
+                    } catch (ClassCastException classCastException) {
+                        if (classCastException.getMessage().contains("be cast to class")) {
+                            log.debug("不是远程会话面板无法刷新重连");
+                        }
                     }
                 }
             }
         };
-        AbstractAction closeCurrentTabAction = new AbstractAction("关闭当前") {
+        AbstractAction closeCurrentTabAction = new AbstractAction("<html><font style='color:red'>关闭当前</font></html>") {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (mainTabbedPane.getSelectedIndex() == 0) return;
                 mainTabbedPane.removeTabAt(mainTabbedPane.getSelectedIndex());
             }
         };
@@ -630,10 +742,7 @@ public class MainFrame extends JFrame implements MouseListener {
             public void actionPerformed(ActionEvent e) {
                 int currentIndex = mainTabbedPane.getSelectedIndex();
                 for (int i = currentIndex - 1; i > 0; i--) {
-                    SshTabbedPane tmp = (SshTabbedPane) mainTabbedPane.getComponentAt(i);
-                    if (tmp != null) {
-                        mainTabbedPane.removeTabAt(i);
-                    }
+                    mainTabbedPane.removeTabAt(i);
                 }
             }
         };
@@ -642,10 +751,7 @@ public class MainFrame extends JFrame implements MouseListener {
             public void actionPerformed(ActionEvent e) {
                 int currentIndex = mainTabbedPane.getSelectedIndex();
                 for (int i = currentIndex + 1; i < mainTabbedPane.getTabCount(); i++) {
-                    SshTabbedPane tmp = (SshTabbedPane) mainTabbedPane.getComponentAt(i);
-                    if (tmp != null) {
-                        mainTabbedPane.removeTabAt(i);
-                    }
+                    mainTabbedPane.removeTabAt(i);
                 }
             }
         };
@@ -653,22 +759,22 @@ public class MainFrame extends JFrame implements MouseListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 for (int i = mainTabbedPane.getTabCount() - 1; i > 0; i--) {
-                    SshTabbedPane tmp = (SshTabbedPane) mainTabbedPane.getComponentAt(i);
-                    if (tmp != null) {
-                        mainTabbedPane.removeTabAt(i);
-                    }
+                    mainTabbedPane.removeTabAt(i);
                 }
             }
         };
+
+        JMenu closeMenu = new JMenu("关闭选项");
+        closeMenu.add(closeLeftAction);
+        closeMenu.add(closeRightAction);
+        closeMenu.add(closeAllTabAction);
 
         popupMenu.add(renameCurrentTabAction);
         popupMenu.add(copyCurrentTabAction);
         popupMenu.add(reconnectAction);
         popupMenu.addSeparator();
         popupMenu.add(closeCurrentTabAction);
-        popupMenu.add(closeLeftAction);
-        popupMenu.add(closeRightAction);
-        popupMenu.add(closeAllTabAction);
+        popupMenu.add(closeMenu);
     }
 
     /**
@@ -723,27 +829,31 @@ public class MainFrame extends JFrame implements MouseListener {
     }
 
 
-    private void showRandomPasswordDialog(){
+    private void showRandomPasswordDialog() {
         JDialog dialog = new JDialog(MainFrame.this);
-        dialog.setTitle("随机密码生成器");
+        dialog.setTitle("密码生成器");
         dialog.setSize(new Dimension(450, 145));
         dialog.setResizable(false);
         dialog.setLocationRelativeTo(MainFrame.this);
-        dialog.setContentPane(new RandomPasswordPane());
+        dialog.setContentPane(new PasswordGeneratorPanel());
         dialog.setVisible(true);
+    }
+
+    public static void setStatusText(String text) {
+        statusBar.setStatusInfoText(text);
     }
 
     // TODO 菜单动作
     private final AbstractAction myNewAction = new AbstractAction("新建会话") {
         public void actionPerformed(final ActionEvent e) {
-            mainTabbedPane.insertTab("新建选项卡", new FlatSVGIcon("icons/addToDictionary.svg"), new NewTabbedPane(mainTabbedPane), "新建选项卡", mainTabbedPane.getTabCount());
+            mainTabbedPane.insertTab("新建会话", new FlatSVGIcon("icons/addToDictionary.svg"), new NewTabbedPane(mainTabbedPane), "新建会话", mainTabbedPane.getTabCount());
             mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
         }
     };
 
     private final AbstractAction mySessionAction = new AbstractAction("会话管理") {
         public void actionPerformed(final ActionEvent e) {
-            mainTabbedPane.insertTab("会话管理", new FlatSVGIcon("icons/addList.svg"), new SessionManagerPanel(mainTabbedPane), "会话管理", mainTabbedPane.getTabCount());
+            mainTabbedPane.insertTab("会话管理", new FlatSVGIcon("icons/addList.svg"), new NewSessionManagerPanel(), "会话管理", mainTabbedPane.getTabCount());
             mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
         }
     };
@@ -751,11 +861,7 @@ public class MainFrame extends JFrame implements MouseListener {
     private final AbstractAction myLocalTerminal = new AbstractAction("本地终端") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            mainTabbedPane.insertTab("<html><font style='color:green'><strong>本地终端</strong></font></html>",
-                    new FlatSVGIcon("icons/console.svg"),
-                    new ConsolePane(),
-                    "本地终端",
-                    mainTabbedPane.getTabCount());
+            mainTabbedPane.insertTab("<html><font style='color:green'><strong>本地终端</strong></font></html>", new FlatSVGIcon("icons/consoleRun.svg"), new ConsolePane(), "本地终端", mainTabbedPane.getTabCount());
             mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
         }
     };
@@ -774,35 +880,9 @@ public class MainFrame extends JFrame implements MouseListener {
                 }
                 editorFrame.setTitle(App.properties.getProperty("editor.title"));
                 editorFrame.setVisible(true);
+                editorFrame.setAlwaysOnTop(isAlwaysOnTop());
+
             }).start();
-        }
-    };
-
-    private final AbstractAction encodeConversionAction = new AbstractAction("文件编码转换") {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            DialogUtil.info("敬请期待");
-        }
-    };
-
-    private final AbstractAction colorPickerAction = new AbstractAction("截图取色") {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            log.debug("取色器");
-            SwingUtilities.invokeLater(() -> {
-                        ColorPicker colorPicker = new ColorPicker();
-                        colorPicker.setVisible(true);
-                    }
-            );
-        }
-    };
-
-    private final AbstractAction qrCodePickerAction = new AbstractAction("二维码") {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            log.debug("QR Code");
-            QRTool qrCode = new QRTool();
-            qrCode.setVisible(true);
         }
     };
 
@@ -829,14 +909,6 @@ public class MainFrame extends JFrame implements MouseListener {
         }
     };
 
-    private final AbstractAction freeRDPAction = new AbstractAction("FreeRDP") {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            FreeRdp freeRdp = new FreeRdp();
-            freeRdp.setVisible(true);
-        }
-    };
-
     private final AbstractAction settingsAction = new AbstractAction("全局配置") {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -846,115 +918,38 @@ public class MainFrame extends JFrame implements MouseListener {
         }
     };
 
+    private final AbstractAction editAppSettingsAction = new AbstractAction("编辑程序配置文件") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            EditorUtils.openFileInEditor("application.properties", Path.of(AppConfig.getWorkPath(), "application.properties").toString());
+        }
+    };
+
+    private final AbstractAction editEditorSettingsAction = new AbstractAction("编辑器配置文件") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            EditorUtils.openFileInEditor("editor.properties", Path.of(AppConfig.getWorkPath(), "config", "editor.properties").toString());
+        }
+    };
+
     private final AbstractAction importSessionAction = new AbstractAction("导入会话") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            FileInputStream fis;
-            try {
-                // 创建一个默认的文件选取器
-                JFileChooser fileChooser = new JFileChooser();
-                // 设置默认显示的文件夹为当前文件夹
-                fileChooser.setCurrentDirectory(new File(AppConfig.getWorkPath() + "/export"));
-                // 设置文件选择的模式（只选文件、只选文件夹、文件和文件均可选）
-                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                // 打开文件选择框（线程将被阻塞, 直到选择框被关闭）
-                int result = fileChooser.showOpenDialog(App.mainFrame);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File file = fileChooser.getSelectedFile();
-                    fis = new FileInputStream(file);
-                    Workbook workbook = new HSSFWorkbook(fis);
-                    Sheet sessionSheet = workbook.getSheet("session");
-                    Sheet tagSheet = workbook.getSheet("tag");
-                    Sheet relationSheet = workbook.getSheet("relation");
-                    for (int i = 0; i <= sessionSheet.getLastRowNum(); i++) {
-                        String[] rowStr = new String[12];
-                        for (int j = 0; j < sessionSheet.getRow(i).getLastCellNum(); j++) {
-                            rowStr[j] = sessionSheet.getRow(i).getCell(j).getStringCellValue();
-                        }
-                        // 更新 session 表
-                        String sql_session = "INSERT INTO session VALUES (null , " +    // id, 自增
-                                "'" + rowStr[0] + "', " +     // session name
-                                "'" + rowStr[1] + "', " +    // protocol
-                                "'" + rowStr[2] + "', " +        // host
-                                "'" + rowStr[3] + "', " +        // port
-                                "'" + rowStr[4] + "', " +        // auth
-                                "'" + rowStr[5] + "', " +        // user
-                                "'" + rowStr[6] + "', " +        // pass
-                                "'" + rowStr[7] + "', " +  // private key
-                                "'" + rowStr[8] + "', " + // create time
-                                "'" + rowStr[9] + "', " + // access time
-                                "'" + rowStr[10] + "', " + // modified time
-                                "'" + rowStr[11] + "');";  // comment
-                        log.debug("sql_session: " + sql_session);
-                        // TODO
-//                        ExcelUtil.importBackup(sql_session);
-                    }
-                    for (int i = 0; i <= tagSheet.getLastRowNum(); i++) {
-                        String[] rowStr = new String[1];
-                        for (int j = 0; j < tagSheet.getRow(i).getLastCellNum(); j++) {
-                            rowStr[j] = tagSheet.getRow(i).getCell(j).getStringCellValue();
-                        }
-                        // 更新 session 表
-                        String sql_tag = "INSERT INTO tag VALUES (null , " +    // id, 自增
-                                "'" + rowStr[0] + "');";
-                        log.debug("sql_tag: " + sql_tag);
-                        if (!rowStr[0].strip().equals("会话标签")) {
-                            // TODO
-//                            ExcelUtil.importBackup(sql_tag);
-                        }
-                    }
-                    for (int i = 0; i <= relationSheet.getLastRowNum(); i++) {
-                        String[] rowStr = new String[2];
-                        for (int j = 0; j < relationSheet.getRow(i).getLastCellNum(); j++) {
-                            rowStr[j] = relationSheet.getRow(i).getCell(j).getStringCellValue();
-                        }
-                        // 更新 session 表
-                        String sql_relation = "INSERT INTO relation VALUES (null , " +    // id, 自增
-                                "'" + rowStr[0] + "', " +
-                                "'" + rowStr[1] + "');";
-                        log.debug("sql_relation: " + sql_relation);
-                        // TODO
-//                        ExcelUtil.importBackup(sql_relation);
-                    }
-                }
-            } catch (IOException fileNotFoundException) {
-                fileNotFoundException.printStackTrace();
-            }
+            SessionExcelHelper.importSessions();
+            DialogUtil.info("会话导入完成");
         }
     };
 
     private final AbstractAction exportSessionAction = new AbstractAction("导出会话") {
+        @SneakyThrows
         @Override
         public void actionPerformed(ActionEvent e) {
-            // 导出文件
-            String file = AppConfig.getWorkPath() + "/export/backup_" + String.valueOf(new Date().getTime()) + ".xls";
-            // 1.创建workbook
-            Workbook workbook = new HSSFWorkbook();
-            // 2.根据workbook创建sheet
-            Sheet sessionSheet = workbook.createSheet("session");
-            Sheet tagSheet = workbook.createSheet("tag");
-            Sheet relationSheet = workbook.createSheet("relation");
-            // TODO 3.写入数据到sheet
-//            ExcelUtil.exportSession(sessionSheet);
-//            ExcelUtil.exportTag(tagSheet);
-//            ExcelUtil.exportRelation(relationSheet);
-
-            // 4.通过输出流写到文件里去
-            FileOutputStream fos = null;
-            try {
-                fos = new FileOutputStream(file);
-                workbook.write(fos);
-                fos.close();
-            } catch (FileNotFoundException fileNotFoundException) {
-                fileNotFoundException.printStackTrace();
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
+            SessionExcelHelper.exportSessions();
             DialogUtil.info("会话导出完成");
         }
     };
 
-    private AbstractAction loadPluginAction = new AbstractAction("加载插件") {
+    private final AbstractAction loadPluginAction = new AbstractAction("加载插件") {
         @Override
         public void actionPerformed(ActionEvent e) {
             log.debug("加载插件");
@@ -962,7 +957,7 @@ public class MainFrame extends JFrame implements MouseListener {
         }
     };
 
-    private AbstractAction managePluginAction = new AbstractAction("插件管理") {
+    private final AbstractAction managePluginAction = new AbstractAction("插件管理") {
         @Override
         public void actionPerformed(ActionEvent e) {
             log.debug("插件管理");
@@ -970,52 +965,47 @@ public class MainFrame extends JFrame implements MouseListener {
         }
     };
 
-    private AbstractAction apiPluginAction = new AbstractAction("插件规范") {
+    private final AbstractAction apiPluginAction = new AbstractAction("插件规范") {
         @SneakyThrows
         @Override
         public void actionPerformed(ActionEvent e) {
             log.debug("插件规范");
-            Desktop.getDesktop().browse(new URL("https://github.com/G3G4X5X6/ultimateshell/wiki/Plugin-development-specification").toURI());
+            Desktop.getDesktop().browse(new URL("https://github.com/G3G4X5X6/ultimate-cube/wiki/0x03-Plugin-development-specification").toURI());
         }
     };
 
-    private AbstractAction githubAction = new AbstractAction("GitHub") {
+    private final AbstractAction githubAction = new AbstractAction("GitHub") {
         @SneakyThrows
         @Override
         public void actionPerformed(ActionEvent e) {
-            Desktop.getDesktop().browse(new URL("https://github.com/G3G4X5X6/ultimateshell").toURI());
+            Desktop.getDesktop().browse(new URL("https://github.com/G3G4X5X6/ultimate-cube").toURI());
         }
     };
 
-    private AbstractAction gitPageAction = new AbstractAction("GitPage") {
+    private final AbstractAction gitPageAction = new AbstractAction("GitPage") {
         @SneakyThrows
         @Override
         public void actionPerformed(ActionEvent e) {
-            Desktop.getDesktop().browse(new URL("https://g3g4x5x6.github.io/ultimateshell/").toURI());
+            Desktop.getDesktop().browse(new URL("https://g3g4x5x6.github.io/ultimate-cube/").toURI());
         }
     };
 
-    private AbstractAction openWorkspace = new AbstractAction("打开工作空间") {
+    private final AbstractAction openWorkspace = new AbstractAction("打开工作空间") {
         @Override
         public void actionPerformed(ActionEvent e) {
             new Thread(() -> {
                 try {
                     Desktop.getDesktop().open(new File(AppConfig.getWorkPath()));
                 } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                    log.error(ioException.getMessage());
                 }
             }).start();
         }
     };
 
-    private final AbstractAction myAboutAction = new AbstractAction("关于 UltimateShell") {
+    private final AbstractAction myAboutAction = new AbstractAction("关于 ultimate-cube") {
         public void actionPerformed(final ActionEvent e) {
-            JOptionPane.showMessageDialog(MainFrame.this,
-                    "<html>ultimate-cube v" + Version.VERSION + " <br>" +
-                            "Build on " + Version.BUILD_TIMESTAMP + "#" + Version.BUILD_NUMBER + "<br><br>" +
-                            "Powered by <a href='https://github.com/G3G4X5X6'>G3G4X5X6</a><br>" +
-                            "Email to <a href='mailto://g3g4x5x6@foxmail.com'>g3g4x5x6@foxmail.com</a></html>",
-                    "About", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(MainFrame.this, "<html>ultimate-cube v" + Version.VERSION + " <br>" + "Build on " + Version.BUILD_TIMESTAMP + "#" + Version.BUILD_NUMBER + "<br><br>" + "Powered by <a href='https://github.com/G3G4X5X6'>G3G4X5X6</a><br>" + "Email to <a href='mailto://g3g4x5x6@foxmail.com'>g3g4x5x6@foxmail.com</a></html>", "About", JOptionPane.INFORMATION_MESSAGE);
         }
     };
 }

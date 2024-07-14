@@ -1,10 +1,9 @@
 package com.g3g4x5x6.editor;
 
-import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.formdev.flatlaf.extras.components.FlatToggleButton;
-import com.g3g4x5x6.editor.util.EditorConfig;
+import com.g3g4x5x6.editor.ui.StatusBar;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.sshd.common.util.OsUtils;
@@ -34,6 +33,7 @@ import static com.formdev.flatlaf.FlatClientProperties.*;
 @Slf4j
 public class EditorFrame extends JFrame implements ActionListener {
     private static EditorFrame editorFrame = null;
+    private FlatToggleButton toggleButton;
     private JMenuBar menuBar = new JMenuBar();
     private JMenu fileMenu = new JMenu("文件");
     private JMenu editMenu = new JMenu("编辑");
@@ -61,7 +61,7 @@ public class EditorFrame extends JFrame implements ActionListener {
     private JButton replaceBtn = new JButton(new FlatSVGIcon("icons/replace.svg"));
     private JToggleButton lineWrapBtn = new JToggleButton(new FlatSVGIcon("icons/toggleSoftWrap.svg"));
     private JTabbedPane tabbedPane;
-    private JToolBar statusBar;
+    private StatusBar statusBar;
     private JPopupMenu trailPopupMenu = new JPopupMenu();
     private JPopupMenu rightPopupMenu = new JPopupMenu();
     private Clipboard clipboard;
@@ -76,7 +76,7 @@ public class EditorFrame extends JFrame implements ActionListener {
         this.setSize(new Dimension(1200, 700));
         this.setPreferredSize(new Dimension(1200, 700));
         this.setLocationRelativeTo(null);
-        this.setIconImage(new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("icon.jpg"))).getImage());
+        this.setIconImage(new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("icon.png"))).getImage());
 
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
@@ -91,11 +91,12 @@ public class EditorFrame extends JFrame implements ActionListener {
         menuBar.add(winMenu);
         menuBar.add(aboutMenu);
         // TODO 置顶图标按钮
-        FlatToggleButton toggleButton = new FlatToggleButton();
+        toggleButton = new FlatToggleButton();
         toggleButton.setIcon(new FlatSVGIcon("icons/pinTab.svg"));
         toggleButton.setButtonType(FlatButton.ButtonType.toolBarButton);
         toggleButton.setToolTipText("窗口置顶");
         toggleButton.setFocusable(false);
+        toggleButton.setSelected(this.isAlwaysOnTop());
         toggleButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -144,8 +145,7 @@ public class EditorFrame extends JFrame implements ActionListener {
             }
         });
 
-        statusBar = new JToolBar();
-        statusBar.setFloatable(false);
+        statusBar = new StatusBar();
         initStatusBar();
 
         this.setJMenuBar(menuBar);
@@ -154,7 +154,13 @@ public class EditorFrame extends JFrame implements ActionListener {
         this.add(statusBar, BorderLayout.SOUTH);
     }
 
-    public static EditorFrame getInstance(){
+    @Override
+    public void setVisible(boolean b) {
+        super.setVisible(b);
+        toggleButton.setSelected(this.isAlwaysOnTop());
+    }
+
+    public static EditorFrame getInstance() {
         if (editorFrame == null)
             editorFrame = new EditorFrame();
         return editorFrame;
@@ -204,15 +210,17 @@ public class EditorFrame extends JFrame implements ActionListener {
     private void initStatusBar() {
 
         // 搜索状态
-        searchStatusLabel = new JLabel("Ready");
+        searchStatusLabel = new JLabel();
+        searchStatusLabel.setIcon(new FlatSVGIcon("icons/green.svg"));
+        searchStatusLabel.setToolTipText("查找状态提示");
 
         // 文件类型
         syntaxLabel = new JLabel("text/plain");
-        syntaxLabel.setIcon(new FlatSVGIcon("icons/file-text.svg"));
+        syntaxLabel.setIcon(new FlatSVGIcon("icons/extensionRunConfiguration.svg"));
         JPopupMenu langMenu = new JPopupMenu();
         langMenu.setAutoscrolls(true);
-        langMenu.setSize(new Dimension(200, 1000));
-        langMenu.setPreferredSize(new Dimension(200, 1000));
+//        langMenu.setSize(new Dimension(200, 1000));
+//        langMenu.setPreferredSize(new Dimension(200, 1000));
         Class<SyntaxConstants> syntaxConstantsClass = SyntaxConstants.class;
         Field[] fields = syntaxConstantsClass.getDeclaredFields();
         for (Field field : fields) {
@@ -239,11 +247,11 @@ public class EditorFrame extends JFrame implements ActionListener {
                 }
             }
         });
-        statusBar.add(Box.createGlue());
-        statusBar.addSeparator();
-        statusBar.add(searchStatusLabel);
-        statusBar.addSeparator();
-        statusBar.add(syntaxLabel);
+
+        statusBar.setComponent(new JLabel("  "));
+        statusBar.setComponent(searchStatusLabel);
+        statusBar.setGlue();
+        statusBar.setComponent(syntaxLabel);
     }
 
     private void initClosableTabs(JTabbedPane tabbedPane) {

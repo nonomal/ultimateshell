@@ -1,17 +1,15 @@
-[//]: # (<p>)
+<div align=center style="margin-top: 10px;">
 
-[//]: # (  <img src="doc/img/cube.jpg" alt="G3G4X5X6"/>)
+![nuclei-plus-icon](doc/img/splashscreen.png)
+<h1>ultimate-cube</h1>
+</div>
 
-[//]: # (</p>)
-![ultimate-cube](https://socialify.git.ci/G3G4X5X6/ultimate-cube/image?description=1&font=KoHo&forks=1&issues=1&language=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1)
+> [English](README.en.md)
 
-# ultimate-cube
+#### 简介
 
-简体中文 [English](README.en.md)
-
-#### 介绍
-
-ultimate-cube 是开源的远程服务器管理工具箱，目标是为渗透测试工程师、程序员、网站管理员、IT 管理员以及几乎所有需要以更简单的方式处理远程工作的用户提供大量定制功能。
+ultimate-cube 是开源的远程服务器管理工具箱，目标是为安全工程师、程序员、网站管理员、IT
+管理员以及几乎所有需要以更简单的方式处理远程工作的用户提供大量定制功能。
 
 #### 软件架构
 
@@ -29,7 +27,6 @@ ultimate-cube 是开源的远程服务器管理工具箱，目标是为渗透测
 - [x] 支持 `VNC`，基于`TightVNC Viewer` 实现
 - [x] 支持 `集成外部工具`，实现快速启动
 - [x] 内置 `简易编辑器` ，可编辑本地、远程文本文件
-- [x] <del>内置 `Nuclei` GUI，POC概念验证框架，已开启独立项目</del>
 - [x] 支持60多种主题皮肤切换
 
 #### 未来计划
@@ -38,48 +35,59 @@ ultimate-cube 是开源的远程服务器管理工具箱，目标是为渗透测
 - [ ] 支持插件系统
 - [ ] 支持国际化
 - [ ] 友好提示异常及报错信息
+- [ ] 优化资源释放
+- [ ] 主密码（master password）
+- [ ] 支持多种加密方法
+- [ ] 支持HTTP/SOCK5代理配置
 
 #### 安装教程
 
-1. 程序依赖运行环境：`JDK11+`
-1. `linux`, `OSX` 用户建议使用自带依赖的通用版本 ultimate-cube-x.x.x-jar-with-dependencies.jar
-1. `Windows` 用户 `无JDK` 环境的,建议使用 `ultimate-cube_setup.exe` 安装包（体积较大）
+##### A. github
 
-#### 使用说明
+```shell
+# 1. 程序依赖运行环境：`JDK11+`
+# 2. `linux`, `OSX` 用户建议使用自带依赖的通用版本 ultimate-cube-x.x.x-jar-with-dependencies.jar
+# 3. `Windows` 用户 `无JDK` 环境的,建议使用 `ultimate-cube_setup.exe` 安装包（体积较大）
+```
 
-##### 新建会话
+##### B. winget
 
-![SSH](doc/img/img_2.png)
-![Serial](doc/img/img_3.png)
+```shell
+# search
+winget search ultimatecube
 
-##### SSH
+# install
+winget install ultimatecube
+```
 
-![img.png](doc/img/img.png)
-
-##### SFTP
-
-![img.png](doc/img/img_1.png)
+![SSH](doc/img/img_5.png)
 
 #### 构建
 
 1. 构建环境：`JDK11+`, `IDEA`
 2. 安装依赖：
-   ```shell
-    # tightvnc-jviewer.jar, jediterm-pty-2.66.jar, com.jediterm.terminal-2.66.jar, jediterm-typeahead-2.66.jar
-    mvn install:install-file -Dfile=libs/tightvnc-jviewer.jar -DgroupId=com.g3g4x5x6  -DartifactId=tightvnc-jviewer -Dversion=2.8.3 -Dpackaging=jar
-    # mvn install:install-file -Dfile=libs/jediterm-typeahead-2.66.jar -DgroupId=com.g3g4x5x6  -DartifactId=jediterm-typeahead -Dversion=2.66 -Dpackaging=jar
-    # mvn install:install-file -Dfile=libs/jediterm-pty-2.66.jar -DgroupId=com.g3g4x5x6  -DartifactId=jediterm-pty -Dversion=2.66 -Dpackaging=jar
-   ```
+
+```shell
+# vnc
+mvn install:install-file -Dfile=libs/tightvnc-jviewer.jar -DgroupId=com.g3g4x5x6  -DartifactId=tightvnc-jviewer -Dversion=2.8.3 -Dpackaging=jar
+# jediterm
+mvn install:install-file -Dfile=libs/jediterm-core-3.44-SNAPSHOT.jar -DgroupId=com.jediterm  -DartifactId=jediterm-core -Dversion=3.44-SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=libs/jediterm-ui-3.44-SNAPSHOT.jar -DgroupId=com.jediterm  -DartifactId=jediterm-ui -Dversion=3.44-SNAPSHOT -Dpackaging=jar
+```
+
 3. 编译运行：
-    1. 统一修改各模块版本号：`mvn versions:set -DnewVersion=6.6.6`
-    2. 运行 `maven` 插件 `templating` 编译 `Version.java` 文件
-    3. `IDEA` 菜单中 `Build Proect` 项目，复制静态文件到 `target` 目录
-    4. 运行项目或者打包（`maven` 插件 `assembly:assembly`）
+    1. 统一修改各模块版本号：`mvn versions:set -DnewVersion=7.0.0`
+    1. 运行 `maven` 插件 `templating` 编译 `Version.java` 文件
+    1. 安装新版本依赖：`mvn install`
+    1. `IDEA` 菜单中 `Build Proect` 项目，复制静态文件到 `target` 目录
+    1. 运行项目或者打包（`maven` 插件 `assembly:assembly`）
 
+#### 注意事项
 
-1. 程序更新后，若无法正常连接SSH，请备份删除原配置文件 `application.properties`。
-2. 关于使用过程中的任何疑问，请于 GitHub 中的 `Discussions` 中的对应版本进行提问和反馈。
-3. 任何 `Issues` 请到 github 项目仓库中提出，此仓库仅作为源码存储仓库。
+1. 请备份配置文件 `application.properties` 中的会话加密密钥 `ssh.session.secret.key`，丢失后将无法解密已加密的会话密码。
+2. 程序更新后，配置文件可能有所变动，若无法正常连接SSH，请备份并删除原配置文件 `application.properties`。
+3. 关于使用过程中的任何疑问，请于 GitHub 中的 `Discussions` 中的对应版本进行提问和反馈。
+4. 任何 `Issues` 请到 github 项目仓库中提出。
 
 #### 参与贡献
 
@@ -88,3 +96,23 @@ ultimate-cube 是开源的远程服务器管理工具箱，目标是为渗透测
 3. 提交代码
 4. 新建 Pull Request
 
+#### 使用说明
+
+##### 快速面板
+
+![1_quick.png](doc%2Fimg%2F1_quick.png)
+
+##### 新建会话
+
+![4_create_session.png](doc%2Fimg%2F4_create_session.png)
+
+##### SSH
+
+![2_ssh.png](doc%2Fimg%2F2_ssh.png)
+
+##### SFTP
+![3_sftp.png](doc%2Fimg%2F3_sftp.png)
+
+#### [感谢 `JetBrains` 提供的强大开发工具](https://jb.gg/OpenSourceSupport)
+
+![JetBrains Logo (Main) logo](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)

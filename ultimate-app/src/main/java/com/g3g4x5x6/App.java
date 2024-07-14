@@ -1,19 +1,20 @@
 package com.g3g4x5x6;
 
 import com.formdev.flatlaf.FlatLightLaf;
-import com.g3g4x5x6.dialog.LockDialog;
-import com.g3g4x5x6.ssh.SessionInfo;
+import com.g3g4x5x6.remote.ssh.SessionInfo;
+import com.g3g4x5x6.remote.utils.CommonUtil;
+import com.g3g4x5x6.ui.dialog.LockDialog;
 import com.g3g4x5x6.ui.tray.DefaultTrayIcon;
 import com.g3g4x5x6.ui.tray.DefaultTrayIconPopupMenu;
-import com.g3g4x5x6.utils.AppConfig;
 import com.g3g4x5x6.utils.CheckUtil;
-import com.g3g4x5x6.utils.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.PropertyConfigurator;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +39,7 @@ public class App {
     public static AtomicBoolean lockState = new AtomicBoolean(false);
     public static LinkedHashMap<String, SessionInfo> sessionInfos = new LinkedHashMap<>();
     public static String lockPassword = "";
+    public static boolean isFocus = false;
 
     public static void main(String[] args) {
         // 显示旗标
@@ -50,6 +52,10 @@ public class App {
         CheckUtil.checkEnv();
         // 加载自定义日志配置
         initLog4j();
+        // 修改默认字体
+        if (AppConfig.getProperty("app.font.enable").equals("true")) {
+            setDefaultFont();
+        }
         // 启动主程序
         SwingUtilities.invokeLater(App::createGUI);
     }
@@ -61,8 +67,69 @@ public class App {
             String configFilename = Objects.requireNonNull(App.class.getClassLoader().getResource("")).getPath() + "log4j.properties";
             PropertyConfigurator.configureAndWatch(configFilename);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("日志器加载异常：" + e.getMessage());
         }
+    }
+
+    private static void setDefaultFont() {
+        // 读取字体文件
+        try (InputStream fontStream = Objects.requireNonNull(App.class.getClassLoader().getResourceAsStream("fonts/SarasaMono-TTF-1.0.13/" + "SarasaMonoSC-Regular.ttf"))) {
+            // 加载字体
+            Font font = null;
+
+            if (!AppConfig.getProperty("app.font").isBlank()) {
+                font = new Font(AppConfig.getProperty("app.font"), Font.PLAIN, Integer.parseInt(AppConfig.getProperty("app.font.size")));
+            }
+            if (font == null) {
+                // 默认备用
+                font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
+            }
+
+            // 注册字体
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(font);
+
+            // 设置所有组件的默认字体
+            setUIFont(new FontUIResource(font.deriveFont(Font.PLAIN, Integer.parseInt(AppConfig.getProperty("app.font.size")))));
+
+        } catch (FontFormatException | IOException e) {
+            log.debug(e.getMessage());
+        }
+    }
+
+    private static void setUIFont(FontUIResource fontResource) {
+        // 设置所有组件的默认字体
+        UIManager.put("MenuBar.font", fontResource);
+        UIManager.put("Menu.font", fontResource);
+        UIManager.put("MenuItem.font", fontResource);
+        UIManager.put("PopupMenu.font", fontResource);
+        UIManager.put("Tree.font", fontResource);
+        UIManager.put("Label.font", fontResource);
+        UIManager.put("TableHeader.font", fontResource);
+        UIManager.put("Table.font", fontResource);
+        UIManager.put("Button.font", fontResource);
+        UIManager.put("ToggleButton.font", fontResource);
+        UIManager.put("RadioButton.font", fontResource);
+        UIManager.put("CheckBox.font", fontResource);
+        UIManager.put("ColorChooser.font", fontResource);
+        UIManager.put("ComboBox.font", fontResource);
+        UIManager.put("List.font", fontResource);
+        UIManager.put("RadioButtonMenuItem.font", fontResource);
+        UIManager.put("CheckBoxMenuItem.font", fontResource);
+        UIManager.put("OptionPane.font", fontResource);
+        UIManager.put("Panel.font", fontResource);
+        UIManager.put("ProgressBar.font", fontResource);
+        UIManager.put("ScrollPane.font", fontResource);
+        UIManager.put("Viewport.font", fontResource);
+        UIManager.put("TextField.font", fontResource);
+        UIManager.put("PasswordField.font", fontResource);
+        UIManager.put("TextArea.font", fontResource);
+        UIManager.put("TextPane.font", fontResource);
+        UIManager.put("EditorPane.font", fontResource);
+        UIManager.put("TabbedPane.font", fontResource);
+        UIManager.put("TitledBorder.font", fontResource);
+        UIManager.put("ToolBar.font", fontResource);
+        UIManager.put("ToolTip.font", fontResource);
     }
 
     private static void createGUI() {
@@ -87,40 +154,9 @@ public class App {
                 log.debug("加载主题：" + properties.getProperty("app.theme.class"));
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
             log.error("Failed to initialize LaF !!!!!!!! \n" + ex.getMessage());
         }
         UIManager.put("TextComponent.arc", 5);
-    }
-
-    private static void initSystemTray() {
-        /*
-         * 添加系统托盘
-         */
-        if (SystemTray.isSupported()) {
-            // 获取当前平台的系统托盘
-            SystemTray tray = SystemTray.getSystemTray();
-            // 加载一个图片用于托盘图标的显示
-            Image image = null;
-            try {
-                image = ImageIO.read(Objects.requireNonNull(App.class.getClassLoader().getResource("icon.jpg")));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            // 创建右键图标时的弹出菜单：JPopupMenu
-            DefaultTrayIconPopupMenu popupMenu = new DefaultTrayIconPopupMenu();
-            // 创建一个托盘图标
-            assert image != null;
-            DefaultTrayIcon trayIcon = new DefaultTrayIcon(image, "点击打开", popupMenu);
-
-            // 添加托盘图标到系统托盘
-            try {
-                tray.add(trayIcon);
-            } catch (AWTException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public static void openApp() {
@@ -143,7 +179,7 @@ public class App {
                 assert appIn != null;
                 Files.copy(appIn, Path.of(AppConfig.getPropertiesPath()));
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("配置初始化异常：{}", e.getMessage());
             }
         }
 
@@ -154,7 +190,7 @@ public class App {
                 assert logIn != null;
                 Files.copy(logIn, Path.of(AppConfig.getWorkPath() + "/log4j.properties"));
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("初始化日志配置异常：" + e.getMessage());
             }
         }
 
@@ -183,7 +219,46 @@ public class App {
         }
     }
 
-    private static void showBanner(){
+    private static void initSystemTray() {
+        /*
+         * 添加系统托盘
+         */
+        if (SystemTray.isSupported()) {
+            // 获取当前平台的系统托盘
+            SystemTray tray = SystemTray.getSystemTray();
+            // 加载一个图片用于托盘图标的显示
+            Image image = null;
+            try {
+                image = ImageIO.read(Objects.requireNonNull(App.class.getClassLoader().getResource("icon.png")));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            // 创建右键图标时的弹出菜单：JPopupMenu
+            DefaultTrayIconPopupMenu popupMenu = new DefaultTrayIconPopupMenu();
+            // 创建一个托盘图标
+            assert image != null;
+            DefaultTrayIcon trayIcon = new DefaultTrayIcon(image, "点击打开", popupMenu);
+            trayIcon.addActionListener(new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    App.mainFrame.setVisible(true);
+                    App.mainFrame.toFront();
+                    App.mainFrame.requestFocus();
+                }
+            });
+
+            // 添加托盘图标到系统托盘
+            try {
+                tray.add(trayIcon);
+            } catch (AWTException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    private static void showBanner() {
         // Credits
         System.out.println(colorize("==============================================================", CYAN_TEXT(), BOLD()));
         System.out.print(colorize("\tPOWER BY ", BOLD(), BRIGHT_YELLOW_TEXT(), GREEN_BACK()));

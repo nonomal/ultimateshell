@@ -2,7 +2,7 @@ package com.g3g4x5x6.tools.external;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.g3g4x5x6.utils.AppConfig;
+import com.g3g4x5x6.AppConfig;
 import com.g3g4x5x6.utils.os.OsInfoUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,6 +41,16 @@ public class ExternalToolIntegration {
         }
     }
 
+    public void initExternalToolsPopupMenu(JPopupMenu popupMenu) {
+        for (String category : items.keySet()) {
+            JMenu cateMenu = new JMenu(category);
+            for (JMenuItem item : items.get(category)) {
+                cateMenu.add(item);
+            }
+            popupMenu.add(cateMenu);
+        }
+    }
+
     private JSONArray parseSettings() {
         JSONArray array;
         try {
@@ -67,8 +77,7 @@ public class ExternalToolIntegration {
             e.printStackTrace();
             return new JSONArray();
         }
-        if (array == null)
-            array = new JSONArray();
+        if (array == null) array = new JSONArray();
         return array;
     }
 
@@ -107,13 +116,14 @@ public class ExternalToolIntegration {
     }
 
     /**
-     * 内置变量替换：%BasePath%
+     * 内置变量替换：
+     * %BasePath%          = AppConfig.getWorkPath() + "/tools/external_tools"
+     * %InstallPath%       = AppConfig.getInstallPath()
      */
     private String replaceBasePath(String path) {
-        return path.replaceAll(
-                "%BasePath%",
-                Path.of(AppConfig.getWorkPath() + "/tools/external_tools").toString().replaceAll("\\\\", "/")
-        );
+        String tmpPath = path.replaceAll("%BasePath%", Path.of(AppConfig.getWorkPath() + "/tools/external_tools").toString().replaceAll("\\\\", "/"));
+        tmpPath = tmpPath.replaceAll("%InstallPath%", Path.of(AppConfig.getInstallPath()).toString().replaceAll("\\\\", "/"));
+        return tmpPath;
     }
 
     private void exec(String commandStr, String workDir) {
